@@ -1,5 +1,5 @@
 .section .data
-.equ RECORD_SIZE, 58
+.equ RECORD_SIZE, 54
 output_file:
     .ascii "enemy_rec.dat\0"
 enemy_skeleton:

@@ -1,3 +1,4 @@
+    .include "./src/enemy_rec_def.s"
     .section .data
 greeting_msg:
     .ascii "Welcome weary and silly traveler!\0"
@@ -25,6 +26,17 @@ battle_choice_msg:
     .section .text
     .globl _start
 _start:
+    pushl $5
+    call random_int
+    add $4, %esp
+
+    call int_to_str
+
+
+    pushl %eax
+    call print_stdout
+    addl $4, %esp
+    jmp exit
     pushl $greeting_msg
     call print_stdout
     addl $4, %esp
@@ -54,8 +66,6 @@ handle_travel_choice:
     call print_stdout
     addl $4, %esp
     jmp read_choice
-
-
 
     # Print choic for testing
     # pushl $CHOICE_BUFFER
