@@ -1,7 +1,9 @@
     .section .data
-urandom:
-    .ascii "/dev/urandom\0"
-.section .text
+urandom_path: .ascii "/dev/urandom\0"  # File path for /dev/urandom
+
+    .section .bss
+    .lcomm random_number, 4 
+    .section .text
     .globl random_int
     .type random_int, @function
     #PURPOSE: Provide a random ingeger from 0-parameter
@@ -10,34 +12,34 @@ urandom:
 random_int:
     pushl %ebp
     movl %esp, %ebp
-    subl $4, %esp # Make space on stack for local varible
-    # Open urandom file
-    movl $5, %eax
-    movl $urandom, %ebx
-    movl $0, %ecx
-    movl $0666, %edx
-    int $0x80
 
-    movl %eax, %ebx
-    # Read one integer from file
-    movl $3, %eax
-    movl -4(%ebp), %ecx
-    movl $4, %edx
+    movl $5, %eax                          # sys_open system call number (5)
+    movl $urandom_path, %ebx               # Path to /dev/urandom
+    movl $0, %ecx                          # Flags (0 = O_RDONLY)
+    int $0x80                              # Make system call
 
-    #Modulo operation for desired range
-    movl -4(%ebp), %eax
-    movl 8(%ebp), %ecx
-    xorl %edx, %edx
-    divl %ecx
+    # Store file descriptor in ebx for later read call
+    movl %eax, %ebx                        # Move file descriptor to %ebx
 
-    # incease range from [0-2] to [1-3]
-    incl %edx
+    # Read 4 bytes (one integer) from /dev/urandom into random_number
+    movl $3, %eax                          # sys_read system call number (3)
+    movl $random_number, %ecx              # Buffer to store the read integer
+    movl $8, %edx                          # Number of bytes to read
+    int $0x80                              # Make system call
 
-    # Close file
-    movl $6, %eax
-    int $0x80
+    movl random_number, %eax
+
+    movl 8(%ebp), %ecx         # load the upper range parameter (1st argument)
+    xorl %edx, %edx            # clear EDX for division
+    divl %ecx                   # divide EAX by upper range
+    incl %edx    
+
+    # Close /dev/urandom
+    movl $6, %eax                          # sys_close system call number (6)
+    int $0x80                              # Make system call to close file
+
     movl %edx, %eax
-
+    
     movl %ebp, %esp
     popl %ebp
     ret

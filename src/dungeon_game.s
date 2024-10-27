@@ -28,10 +28,9 @@ battle_choice_msg:
 _start:
     pushl $5
     call random_int
-    add $4, %esp
+    addl $4, %esp
 
     call int_to_str
-
 
     pushl %eax
     call print_stdout
@@ -96,44 +95,4 @@ enter_dungeon:
     addl $4, %esp
     jmp exit
 
-    .type print_stdout,@function
-print_stdout:
-    pushl %ebp
-    movl %esp, %ebp
 
-    #calculate string length
-    pushl 8(%ebp)
-    call strlen
-    addl $4, %esp
-    movl %eax, %edx
-
-    movl $4, %eax
-    movl $1, %ebx
-    movl 8(%ebp), %ecx
-    int $0x80
-
-    movl %ebp, %esp
-    popl %ebp
-    ret
-
-    .type strlen,@function
-    # Takes one parameter which is the string to calculate the length of
-    # %edi holds the current index. If that index is a null byte then the function ends and moves %edi to %eax
-    # Returns the length in %eax
-strlen:
-    pushl %ebp
-    movl %esp, %ebp
-
-    movl 8(%ebp), %ecx
-    movl $0, %edi
-strlen_loop:
-    cmpb $0, (%ecx, %edi, 1)
-    je strlen_end
-    incl %edi
-    jmp strlen_loop
-
-strlen_end:
-    movl %edi, %eax
-    movl %ebp, %esp
-    popl %ebp
-    ret
