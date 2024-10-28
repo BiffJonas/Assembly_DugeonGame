@@ -20,22 +20,12 @@ battle_choice_msg:
     .ascii "Flee(1) | Battle to the death(2)\0"
 
     .section .bss
-    .equ BUFFER_SIZE, 10
-    .lcomm CHOICE_BUFFER, BUFFER_SIZE
+    ; .equ BUFFER_SIZE, 10
+    ; .lcomm CHOICE_BUFFER, BUFFER_SIZE
 
     .section .text
     .globl _start
 _start:
-    pushl $5
-    call random_int
-    addl $4, %esp
-
-    call int_to_str
-
-    pushl %eax
-    call print_stdout
-    addl $4, %esp
-    jmp exit
     pushl $greeting_msg
     call print_stdout
     addl $4, %esp
@@ -47,15 +37,10 @@ _start:
     # Read Choice
 
 read_choice:
-    movl $3, %eax
-    movl $0, %ebx
-    movl $CHOICE_BUFFER, %ecx
-    movl $BUFFER_SIZE, %edx
-    int $0x80
+    call read_stdin
 
     # TODO: Make function that handles user input and validation. Params(choice_msg, number_of_choices)
 handle_travel_choice:
-    movb CHOICE_BUFFER, %al
     cmpb $'1', %al
     je travel_town
     cmpb $'2', %al
@@ -65,11 +50,6 @@ handle_travel_choice:
     call print_stdout
     addl $4, %esp
     jmp read_choice
-
-    # Print choic for testing
-    # pushl $CHOICE_BUFFER
-    # call print_stdout
-    # addl $4, %esp
 
 exit:
     movl $1, %eax
